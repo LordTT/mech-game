@@ -25,3 +25,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="Drone" parent="." unique_id=500017850 instance=ExtResource("3_l3cfh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 0)
+mech_path = NodePath("../Mech")

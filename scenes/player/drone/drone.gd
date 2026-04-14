@@ -2,17 +2,24 @@ extends CharacterBody3D
 
 @export var speed: float = 6.0
 @export var mouse_sensitivity: float = 0.002
+@export var mech_path: NodePath
+var mech: Node = null
 
 var yaw: float = 0.0
 var pitch: float = 0.0
 var current_target: Node = null
 var is_player_controlled: bool = false
 
+@export var snap_radius: float = 1.5
+@export var attach_radius: float = 0.45
+@export var snap_follow_speed: float = 10.0
+
 var held_object: Node3D = null
 @onready var hold_point: Marker3D = $CameraPivot/HoldPoint
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	mech = get_node_or_null(mech_path)
 
 func _input(event: InputEvent) -> void:
 	if not is_player_controlled:
@@ -70,6 +77,7 @@ func _update_highlight() -> void:
 				current_target.unhighlight()
 
 			current_target = target
+			print(current_target)
 			
 			if current_target and current_target.has_method("highlight"):
 				current_target.highlight()
@@ -103,12 +111,50 @@ func _update_held_object() -> void:
 	if held_object == null:
 		return
 
-	var target_pos = hold_point.global_position
-	var current_pos = held_object.global_position
+	var target_transform: Transform3D = hold_point.global_transform
+	var best_slot := _find_best_slot_for_held_object()
 
-	held_object.global_position = current_pos.lerp(target_pos, 5.0 * get_physics_process_delta_time())
+	if best_slot != null:
+		target_transform = best_slot.global_transform
+
+		var distance := held_object.global_position.distance_to(best_slot.global_position)
+		if distance <= attach_radius:
+			best_slot.attach_part(held_object)
+			held_object = null
+			return
+
+	var t := snap_follow_speed * get_physics_process_delta_time()
+
+	held_object.global_position = held_object.global_position.lerp(target_transform.origin, t)
+	held_object.global_rotation = held_object.global_rotation.lerp(target_transform.basis.get_euler(), t)
+
 	
-	held_object.global_rotation = held_object.global_rotation.lerp(
-	hold_point.global_rotation,
-	10.0 * get_physics_process_delta_time()
-)
+func _find_best_slot_for_held_object() -> Node3D:
+	if held_object == null:
+		return null
+
+	if mech == null:
+		return null
+
+	if not mech.has_node("SlotsRoot"):
+		return null
+
+	var slots_root = mech.get_node("SlotsRoot")
+	var best_slot: Node3D = null
+	var best_distance := INF
+
+	for child in slots_root.get_children():
+		if not child.has_method("can_attach"):
+			continue
+
+		if not child.can_attach(held_object):
+			continue
+
+		var slot: Node3D = child
+		var distance := held_object.global_position.distance_to(slot.global_position)
+
+		if distance < best_distance and distance <= snap_radius:
+			best_distance = distance
+			best_slot = slot
+
+	return best_slot
