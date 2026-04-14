@@ -25,6 +25,7 @@ mesh = SubResource("SphereMesh_kuxy6")
 
 [node name="InteractRay" type="RayCast3D" parent="CameraPivot" unique_id=334459093]
 target_position = Vector3(0, 0, -5)
+collide_with_areas = true
 
 [node name="HoldPoint" type="Marker3D" parent="CameraPivot" unique_id=830675509]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)

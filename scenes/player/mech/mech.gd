@@ -12,6 +12,7 @@ var is_player_controlled: bool = true
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera_yaw: Node3D = $CameraPivot/CameraYaw
 @onready var camera_pitch: Node3D = $CameraPivot/CameraYaw/CameraPitch
+@onready var legs_slot: Node = $SlotsRoot/Slot_Legs
 
 func _ready() -> void:
 	camera_pivot.top_level = true
@@ -48,6 +49,9 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	var can_move := has_legs()
+	
+	
 	var input_dir: Vector2 = Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	input_dir.y = Input.get_action_strength("move_forward") - Input.get_action_strength("move_back")
@@ -66,8 +70,12 @@ func _physics_process(delta: float) -> void:
 	if move_vector.length() > 1.0:
 		move_vector = move_vector.normalized()
 
-	velocity.x = move_vector.x * move_speed
-	velocity.z = move_vector.z * move_speed
+	if can_move:
+		velocity.x = move_vector.x * move_speed
+		velocity.z = move_vector.z * move_speed
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -82,3 +90,6 @@ func _physics_process(delta: float) -> void:
 
 func _update_camera_pivot_position() -> void:
 	camera_pivot.global_position = global_position + Vector3(0.0, 1.5, 0.0)
+	
+func has_legs() -> bool:
+	return legs_slot.current_part != null

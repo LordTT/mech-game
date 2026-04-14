@@ -14,13 +14,10 @@ func can_attach(part: Node) -> bool:
 
 func attach_part(part: Node3D) -> void:
 	current_part = part
+
+	var saved_transform := global_transform
 	part.reparent(self)
-	part.global_transform = global_transform
+	part.global_transform = saved_transform
 
 	if part.has_method("on_attached_to_slot"):
 		part.on_attached_to_slot(self)
-
-func detach_part() -> Node3D:
-	var part: Node3D = current_part
-	current_part = null
-	return part

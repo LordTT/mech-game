@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bvgdjm1h0ybqh"]
 
-[ext_resource type="Script" uid="uid://cvu6x31u3y2c4" path="res://scripts/core/grabbable.gd" id="1_y0ede"]
+[ext_resource type="Script" uid="uid://cvu6x31u3y2c4" path="res://scripts/core/part.gd" id="1_y0ede"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bb2ca"]
 size = Vector3(20, 1, 20)
@@ -14,6 +14,8 @@ size = Vector3(20, 1, 20)
 albedo_color = Color(0, 0.48235294, 1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_pafjj"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sy4cr"]
 
 [node name="TestArena" type="Node3D" unique_id=669469071]
 
@@ -29,6 +31,7 @@ shape = SubResource("BoxShape3D_y0ede")
 [node name="Box" type="StaticBody3D" parent="." unique_id=931952407]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
 script = ExtResource("1_y0ede")
+part_type = "legs"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Box" unique_id=486602263]
 mesh = SubResource("BoxMesh_y0ede")
@@ -36,3 +39,8 @@ surface_material_override/0 = SubResource("StandardMaterial3D_bb2ca")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Box" unique_id=957510829]
 shape = SubResource("BoxShape3D_pafjj")
+
+[node name="InteractArea" type="Area3D" parent="Box" unique_id=1948118228]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box/InteractArea" unique_id=1776211818]
+shape = SubResource("BoxShape3D_sy4cr")
