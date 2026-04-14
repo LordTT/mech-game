@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://brdt00cfqtw4c"]
+
+[ext_resource type="Script" uid="uid://dbuksnj68hvgr" path="res://scenes/player/drone/drone.gd" id="1_kuxy6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_46npn"]
+radius = 0.3
+
+[sub_resource type="SphereMesh" id="SphereMesh_kuxy6"]
+radius = 0.3
+height = 0.6
+
+[node name="Drone" type="CharacterBody3D" unique_id=1609675526]
+script = ExtResource("1_kuxy6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1319142395]
+shape = SubResource("SphereShape3D_46npn")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1333707896]
+layers = 17
+mesh = SubResource("SphereMesh_kuxy6")
+
+[node name="CameraPivot" type="Node3D" parent="." unique_id=1773838842]
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=273955870]
+
+[node name="InteractRay" type="RayCast3D" parent="CameraPivot" unique_id=334459093]
+target_position = Vector3(0, 0, -5)
+
+[node name="HoldPoint" type="Marker3D" parent="CameraPivot" unique_id=830675509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
