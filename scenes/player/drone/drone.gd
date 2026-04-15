@@ -18,6 +18,8 @@ var pull_progress: float = 0.0
 var last_detached_part: Node3D = null
 var reattach_block_timer: float = 0.0
 
+var highlighted_slot: Node3D = null
+
 @export var reattach_block_duration: float = 0.35
 @export var snap_radius: float = 1.5
 @export var attach_radius: float = 0.45
@@ -109,6 +111,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_highlight()
 	_update_pulling(delta)
+	_update_slot_highlight()
 	_update_held_object()
 
 	move_and_slide()
@@ -162,6 +165,9 @@ func _drop_held_object() -> void:
 
 	if held_object.has_method("drop"):
 		held_object.drop()
+		if highlighted_slot != null and highlighted_slot.has_method("clear_highlight"):
+			highlighted_slot.clear_highlight()
+			highlighted_slot = null
 
 	held_object = null
 	
@@ -262,3 +268,19 @@ func _update_pulling(delta: float) -> void:
 			pull_progress = 0.0
 	else:
 		pull_progress = 0.0
+		
+func _update_slot_highlight() -> void:
+	if highlighted_slot != null and highlighted_slot.has_method("clear_highlight"):
+		highlighted_slot.clear_highlight()
+		highlighted_slot = null
+
+	if held_object == null:
+		return
+
+	var best_slot = _find_best_slot_for_held_object()
+	if best_slot == null:
+		return
+
+	highlighted_slot = best_slot
+	if highlighted_slot.has_method("show_highlight"):
+		highlighted_slot.show_highlight(true)
