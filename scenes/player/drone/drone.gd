@@ -19,12 +19,17 @@ var last_detached_part: Node3D = null
 var reattach_block_timer: float = 0.0
 
 @export var reattach_block_duration: float = 0.35
-@export var snap_radius: float = 1.5
+@export var preview_radius: float = 2.5
 @export var attach_radius: float = 0.45
+@export var attach_speed_threshold: float = 2.0
+
 @export var snap_follow_speed: float = 10.0
 
 @export var detach_distance: float = 1.6
 @export var detach_time_required: float = 0.45
+
+var held_last_position: Vector3 = Vector3.ZERO
+
 
 @onready var hold_point: Marker3D = $CameraPivot/HoldPoint
 
@@ -84,9 +89,6 @@ func set_player_controlled(value: bool) -> void:
 
 func _physics_process(delta: float) -> void:
 	
-	if reattach_block_timer > 0.0:
-		reattach_block_timer -= delta
-	
 	if not is_player_controlled:
 		_clear_current_target()
 		velocity = Vector3.ZERO
@@ -109,7 +111,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_highlight()
 	_update_pulling(delta)
-	_update_held_object()
+	_update_held_object(delta)
 
 	move_and_slide()
 
@@ -120,21 +122,35 @@ func _update_highlight() -> void:
 		var collider = ray.get_collider()
 		var target: Node = collider as Node
 
-		if target != null and target is Area3D:
-			target = target.get_parent()
+		target = _resolve_part_target(target)
 
 		if target != current_target:
 			if current_target and current_target.has_method("unhighlight"):
 				current_target.unhighlight()
 
 			current_target = target
-			print("Target: ", target.name)
 
 			if current_target and current_target.has_method("highlight"):
 				current_target.highlight()
 	else:
 		_clear_current_target()
+		
+func _resolve_part_target(target: Node) -> Node:
+	if target == null:
+		return null
 
+	if target.has_meta("part_root"):
+		return target.get_meta("part_root")
+
+	if target.has_method("pick_up") or target.has_method("detach_from_slot"):
+		return target
+
+	var parent := target.get_parent()
+	if parent != null and (parent.has_method("pick_up") or parent.has_method("detach_from_slot")):
+		return parent
+
+	return target
+	
 func _clear_current_target() -> void:
 	if current_target and current_target.has_method("unhighlight"):
 		current_target.unhighlight()
@@ -165,38 +181,45 @@ func _drop_held_object() -> void:
 
 	held_object = null
 	
-func _update_held_object() -> void:
-	
+func _update_held_object(delta: float) -> void:
 	if not beam_active:
 		return
 
 	if pulling_part != null:
 		return
-	
+
 	if held_object == null:
 		return
-		
-	if pulling_part != null:
-		return
-		
+
+	var previous_position: Vector3 = held_object.global_position
 	var target_transform: Transform3D = hold_point.global_transform
-	var best_slot := _find_best_slot_for_held_object()
+	var best_slot = _find_best_slot_for_held_object()
+
 	if held_object == last_detached_part and reattach_block_timer > 0.0:
 		best_slot = null
 
-	if best_slot != null:
-		target_transform = best_slot.global_transform
-
-		var distance := held_object.global_position.distance_to(best_slot.global_position)
-		if distance <= attach_radius:
-			best_slot.attach_part(held_object)
-			held_object = null
-			return
-
-	var t := snap_follow_speed * get_physics_process_delta_time()
-
+	# Always follow the hold point, not the slot.
+	var t: float = snap_follow_speed * delta
 	held_object.global_position = held_object.global_position.lerp(target_transform.origin, t)
 	held_object.global_rotation = held_object.global_rotation.lerp(target_transform.basis.get_euler(), t)
+
+	var held_velocity: Vector3 = (held_object.global_position - previous_position) / max(delta, 0.0001)
+
+	if best_slot != null:
+		var to_slot_vec: Vector3 = best_slot.global_position - held_object.global_position
+		var distance: float = to_slot_vec.length()
+
+		if distance > 0.001:
+			var to_slot: Vector3 = to_slot_vec.normalized()
+			var toward_slot_speed: float = held_velocity.dot(to_slot)
+
+			if distance <= attach_radius and toward_slot_speed >= attach_speed_threshold:
+				best_slot.attach_part(held_object)
+				held_object = null
+				held_last_position = Vector3.ZERO
+				return
+
+	held_last_position = held_object.global_position
 
 	
 func _find_best_slot_for_held_object() -> Node3D:
@@ -223,7 +246,7 @@ func _find_best_slot_for_held_object() -> Node3D:
 		var slot: Node3D = child
 		var distance := held_object.global_position.distance_to(slot.global_position)
 
-		if distance < best_distance and distance <= snap_radius:
+		if distance < best_distance and distance <= preview_radius:
 			best_distance = distance
 			best_slot = slot
 
