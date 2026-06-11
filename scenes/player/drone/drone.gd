@@ -278,7 +278,13 @@ func _update_pulling(delta: float) -> void:
 
 	var distance: float = hold_point.global_position.distance_to(slot.global_position)
 
-	if distance >= detach_distance:
+	var resistance: float = 1.0
+	if pulling_part.has_method("get_detach_resistance"):
+		resistance = pulling_part.get_detach_resistance()
+
+	var required_distance := detach_distance * resistance
+
+	if distance >= required_distance:
 		pull_progress += delta
 
 		if pull_progress >= detach_time_required:

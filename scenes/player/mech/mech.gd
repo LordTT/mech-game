@@ -50,8 +50,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var can_move := has_legs()
-	
-	
+	var speed_mult := get_legs_move_speed_multiplier()
+	var turn_mult := get_legs_turn_speed_multiplier()
+
 	var input_dir: Vector2 = Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	input_dir.y = Input.get_action_strength("move_forward") - Input.get_action_strength("move_back")
@@ -71,8 +72,8 @@ func _physics_process(delta: float) -> void:
 		move_vector = move_vector.normalized()
 
 	if can_move:
-		velocity.x = move_vector.x * move_speed
-		velocity.z = move_vector.z * move_speed
+		velocity.x = move_vector.x * move_speed * speed_mult
+		velocity.z = move_vector.z * move_speed * speed_mult
 	else:
 		velocity.x = 0.0
 		velocity.z = 0.0
@@ -84,12 +85,32 @@ func _physics_process(delta: float) -> void:
 
 	if move_vector.length() > 0.01:
 		var target_yaw: float = atan2(move_vector.x, move_vector.z)
-		rotation.y = lerp_angle(rotation.y, target_yaw, turn_speed * delta)
+		rotation.y = lerp_angle(rotation.y, target_yaw, turn_speed * turn_mult * delta)
 
 	move_and_slide()
 
 func _update_camera_pivot_position() -> void:
 	camera_pivot.global_position = global_position + Vector3(0.0, 1.5, 0.0)
-	
+
 func has_legs() -> bool:
 	return legs_slot.current_part != null
+
+func get_legs_move_speed_multiplier() -> float:
+	if not has_legs():
+		return 0.0
+
+	var part = legs_slot.current_part
+	if part != null and part.has_method("get_move_speed_multiplier"):
+		return part.get_move_speed_multiplier()
+
+	return 1.0
+
+func get_legs_turn_speed_multiplier() -> float:
+	if not has_legs():
+		return 1.0
+
+	var part = legs_slot.current_part
+	if part != null and part.has_method("get_turn_speed_multiplier"):
+		return part.get_turn_speed_multiplier()
+
+	return 1.0

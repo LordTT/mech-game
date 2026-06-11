@@ -2,28 +2,26 @@
 
 [ext_resource type="Script" uid="uid://c212nnd3p7372" path="res://scenes/parts/base/part_base.gd" id="1_fr6c0"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aof5h"]
-albedo_color = Color(0.34509805, 1, 1, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_fr6c0"]
-material = SubResource("StandardMaterial3D_aof5h")
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_x1re2"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_fr6c0"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5n6tx"]
 
 [node name="PartBase" type="Node3D" unique_id=685279653]
 script = ExtResource("1_fr6c0")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1688418618]
-mesh = SubResource("BoxMesh_fr6c0")
+[node name="VisualRoot" type="Node3D" parent="." unique_id=1590296688]
 
 [node name="InteractArea" type="Area3D" parent="." unique_id=974038680]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea" unique_id=476089334]
 shape = SubResource("BoxShape3D_x1re2")
 
-[node name="LooseBody" type="StaticBody3D" parent="." unique_id=411073856]
+[node name="LooseBody" type="RigidBody3D" parent="." unique_id=1687196333]
+physics_material_override = SubResource("PhysicsMaterial_fr6c0")
+linear_damp = 2.0
+angular_damp = 2.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="LooseBody" unique_id=741347958]
 shape = SubResource("BoxShape3D_5n6tx")

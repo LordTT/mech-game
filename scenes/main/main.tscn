@@ -4,8 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://yc11jt75fwqr" path="res://scenes/player/mech/mech.tscn" id="2_k2fmo"]
 [ext_resource type="Script" uid="uid://dy7osjtirgm5s" path="res://scripts/core/player_controller.gd" id="2_l3cfh"]
 [ext_resource type="PackedScene" uid="uid://brdt00cfqtw4c" path="res://scenes/player/drone/drone.tscn" id="3_l3cfh"]
-[ext_resource type="PackedScene" uid="uid://dqmw3h1qleq8o" path="res://scenes/parts/legs/legs_part.tscn" id="5_ow5a4"]
-[ext_resource type="PackedScene" uid="uid://4gjkpuwalx5g" path="res://scenes/parts/arm/arm_part.tscn" id="6_hujxm"]
+[ext_resource type="PackedScene" uid="uid://c12x2ka1whrs7" path="res://scenes/parts/arm/arm_standard.tscn" id="5_6q06x"]
+[ext_resource type="PackedScene" uid="uid://cj2ahfk5wv7jd" path="res://scenes/parts/legs/legs_heavy.tscn" id="7_b1x3f"]
 
 [node name="Main" type="Node3D" unique_id=1309598273]
 
@@ -23,14 +23,14 @@ mech_path = NodePath("../Mech")
 drone_path = NodePath("../Drone")
 
 [node name="Mech" parent="." unique_id=1129494137 instance=ExtResource("2_k2fmo")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.92099, 0)
 
 [node name="Drone" parent="." unique_id=500017850 instance=ExtResource("3_l3cfh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 0)
 mech_path = NodePath("../Mech")
 
-[node name="PartBase" parent="." unique_id=685279653 instance=ExtResource("5_ow5a4")]
-transform = Transform3D(1, 0, 0, 0, 0.976706, 0.2145819, 0, -0.2145819, 0.976706, 4.101737, 1.097142, 0)
+[node name="PartBase" parent="." unique_id=685279653 instance=ExtResource("5_6q06x")]
+transform = Transform3D(1, 0, 0, 0, 0.77550673, -0.6313393, 0, 0.6313393, 0.77550673, 6.0758257, 2.4531074, 0)
 
-[node name="PartBase2" parent="." unique_id=125085063 instance=ExtResource("6_hujxm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1683109, 7.0213776)
+[node name="PartBase2" parent="." unique_id=1921199229 instance=ExtResource("7_b1x3f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.060975, 6.1990147)
