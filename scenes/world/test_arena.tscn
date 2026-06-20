@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://bvgdjm1h0ybqh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bb2ca"]
+friction = 1.5
+rough = true
+bounce = 0.0
+absorbent = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bb2ca"]
 albedo_color = Color(1, 0.6392157, 0.38039216, 1)

@@ -4,18 +4,22 @@ extends CharacterBody3D
 @export var gravity: float = 20.0
 @export var turn_speed: float = 8.0
 @export var mouse_sensitivity: float = 0.002
+@export var brace_when_missing_legs: bool = true
 
 var yaw: float = 0.0
 var pitch: float = 0.0
 var is_player_controlled: bool = true
+var attached_collision_proxies: Array[CollisionShape3D] = []
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera_yaw: Node3D = $CameraPivot/CameraYaw
 @onready var camera_pitch: Node3D = $CameraPivot/CameraYaw/CameraPitch
 @onready var legs_slot: Node = $SlotsRoot/Slot_Legs
+@onready var slots_root: Node3D = $SlotsRoot
 
 func _ready() -> void:
 	camera_pivot.top_level = true
+	_rebuild_attached_collision_proxies()
 	_update_camera_pivot_position()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
@@ -34,8 +38,15 @@ func _input(event: InputEvent) -> void:
 func set_player_controlled(value: bool) -> void:
 	is_player_controlled = value
 
+func on_slot_part_changed(_slot: Node3D) -> void:
+	call_deferred("_rebuild_attached_collision_proxies")
+
 func _physics_process(delta: float) -> void:
 	_update_camera_pivot_position()
+
+	if _should_brace_without_legs():
+		_apply_no_legs_brace()
+		return
 
 	if not is_player_controlled:
 		velocity.x = 0.0
@@ -49,7 +60,6 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	var can_move := has_legs()
 	var speed_mult := get_legs_move_speed_multiplier()
 	var turn_mult := get_legs_turn_speed_multiplier()
 
@@ -71,12 +81,8 @@ func _physics_process(delta: float) -> void:
 	if move_vector.length() > 1.0:
 		move_vector = move_vector.normalized()
 
-	if can_move:
-		velocity.x = move_vector.x * move_speed * speed_mult
-		velocity.z = move_vector.z * move_speed * speed_mult
-	else:
-		velocity.x = 0.0
-		velocity.z = 0.0
+	velocity.x = move_vector.x * move_speed * speed_mult
+	velocity.z = move_vector.z * move_speed * speed_mult
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -94,6 +100,14 @@ func _update_camera_pivot_position() -> void:
 
 func has_legs() -> bool:
 	return legs_slot.current_part != null
+
+func _should_brace_without_legs() -> bool:
+	return brace_when_missing_legs and not has_legs()
+
+func _apply_no_legs_brace() -> void:
+	velocity = Vector3.ZERO
+	rotation.x = 0.0
+	rotation.z = 0.0
 
 func get_legs_move_speed_multiplier() -> float:
 	if not has_legs():
@@ -114,3 +128,42 @@ func get_legs_turn_speed_multiplier() -> float:
 		return part.get_turn_speed_multiplier()
 
 	return 1.0
+
+func _rebuild_attached_collision_proxies() -> void:
+	_clear_attached_collision_proxies()
+
+	for slot_node in slots_root.get_children():
+		var slot := slot_node as Node3D
+		if slot == null:
+			continue
+
+		var part := slot.get("current_part") as Node3D
+		if part == null:
+			continue
+
+		_add_attached_collision_proxy(slot, part)
+
+func _add_attached_collision_proxy(slot: Node3D, part: Node3D) -> void:
+	if not part.has_method("get_attachment_collision_shape"):
+		return
+
+	if not part.has_method("get_attachment_collision_global_transform"):
+		return
+
+	var source_shape: Shape3D = part.get_attachment_collision_shape()
+	if source_shape == null:
+		return
+
+	var proxy := CollisionShape3D.new()
+	proxy.name = "AttachedCollision_%s" % slot.name
+	proxy.shape = source_shape.duplicate()
+	add_child(proxy)
+	proxy.global_transform = part.get_attachment_collision_global_transform()
+	attached_collision_proxies.append(proxy)
+
+func _clear_attached_collision_proxies() -> void:
+	for proxy in attached_collision_proxies:
+		if is_instance_valid(proxy):
+			proxy.queue_free()
+
+	attached_collision_proxies.clear()

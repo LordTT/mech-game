@@ -30,11 +30,22 @@ func attach_part(part: Node3D) -> void:
 		part.on_attached_to_slot(self)
 
 	clear_highlight()
+	notify_part_changed()
 
 func detach_part() -> Node3D:
 	var part: Node3D = current_part
 	current_part = null
+	notify_part_changed()
 	return part
+
+func notify_part_changed() -> void:
+	var node := get_parent()
+	while node != null:
+		if node.has_method("on_slot_part_changed"):
+			node.on_slot_part_changed(self)
+			return
+
+		node = node.get_parent()
 
 func show_highlight(valid: bool = true) -> void:
 	_ensure_debug_mesh()

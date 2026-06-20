@@ -4,6 +4,9 @@
 [ext_resource type="Script" uid="uid://h6cpd6pcsm03" path="res://scenes/parts/legs/legs_base.gd" id="2_xart8"]
 [ext_resource type="PackedScene" uid="uid://cb2o0m8tctfgp" path="res://art/exports/walker_basic.glb" id="3_xuhar"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_xuhar"]
+size = Vector3(1.7, 3, 2)
+
 [node name="PartBase" unique_id=685279653 instance=ExtResource("1_lojaf")]
 script = ExtResource("2_xart8")
 move_speed_multiplier = 1.0
@@ -13,3 +16,12 @@ display_name = "Standard Legs"
 detach_resistance = 1.4
 
 [node name="walker_basic2" parent="VisualRoot" parent_id_path=PackedInt32Array(1590296688) index="0" unique_id=1400508088 instance=ExtResource("3_xuhar")]
+
+[node name="LooseBody" parent="." index="2" unique_id=1687196333]
+mass = 1.0
+linear_damp = 2.0
+angular_damp = 2.0
+
+[node name="CollisionShape3D" parent="LooseBody" index="0" unique_id=741347958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+shape = SubResource("BoxShape3D_xuhar")

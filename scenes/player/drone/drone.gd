@@ -165,7 +165,7 @@ func _try_grab() -> void:
 	if current_target == null:
 		return
 
-	# If attached → start pulling instead of instant detach
+	# If attached, start pulling instead of instant detach
 	if current_target.has_method("detach_from_slot") and current_target.attached_slot != null:
 		print("Start pulling")
 		pulling_part = current_target
@@ -182,10 +182,8 @@ func _drop_held_object() -> void:
 
 	if held_object.has_method("drop"):
 		held_object.drop()
-		if highlighted_slot != null and highlighted_slot.has_method("clear_highlight"):
-			highlighted_slot.clear_highlight()
-			highlighted_slot = null
 
+	_clear_highlighted_slot()
 	held_object = null
 	
 func _update_held_object(delta: float) -> void:
@@ -200,10 +198,7 @@ func _update_held_object(delta: float) -> void:
 
 	var previous_position: Vector3 = held_object.global_position
 	var target_transform: Transform3D = hold_point.global_transform
-	var best_slot = _find_best_slot_for_held_object()
-
-	if held_object == last_detached_part and reattach_block_timer > 0.0:
-		best_slot = null
+	var best_slot := _get_attach_candidate_for_held_object()
 
 	# Always follow the hold point, not the slot.
 	var t: float = snap_follow_speed * delta
@@ -221,14 +216,33 @@ func _update_held_object(delta: float) -> void:
 			var toward_slot_speed: float = held_velocity.dot(to_slot)
 
 			if distance <= attach_radius and toward_slot_speed >= attach_speed_threshold:
-				best_slot.attach_part(held_object)
-				held_object = null
-				held_last_position = Vector3.ZERO
+				_attach_held_object_to_slot(best_slot)
 				return
 
 	held_last_position = held_object.global_position
 
 	
+func _get_attach_candidate_for_held_object() -> Node3D:
+	if held_object == last_detached_part and reattach_block_timer > 0.0:
+		return null
+
+	return _find_best_slot_for_held_object()
+
+func _attach_held_object_to_slot(slot: Node3D) -> void:
+	if held_object == null or slot == null:
+		return
+
+	slot.attach_part(held_object)
+	held_object = null
+	held_last_position = Vector3.ZERO
+	_clear_highlighted_slot()
+
+func _clear_highlighted_slot() -> void:
+	if highlighted_slot != null and highlighted_slot.has_method("clear_highlight"):
+		highlighted_slot.clear_highlight()
+
+	highlighted_slot = null
+
 func _find_best_slot_for_held_object() -> Node3D:
 	if held_object == null:
 		return null
@@ -300,14 +314,12 @@ func _update_pulling(delta: float) -> void:
 		pull_progress = 0.0
 		
 func _update_slot_highlight() -> void:
-	if highlighted_slot != null and highlighted_slot.has_method("clear_highlight"):
-		highlighted_slot.clear_highlight()
-		highlighted_slot = null
+	_clear_highlighted_slot()
 
 	if held_object == null:
 		return
 
-	var best_slot = _find_best_slot_for_held_object()
+	var best_slot := _get_attach_candidate_for_held_object()
 	if best_slot == null:
 		return
 

@@ -34,3 +34,6 @@ transform = Transform3D(1, 0, 0, 0, 0.77550673, -0.6313393, 0, 0.6313393, 0.7755
 
 [node name="PartBase2" parent="." unique_id=1479448228 instance=ExtResource("6_ow5a4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5556061, 6.050582)
+
+[node name="PartBase3" parent="." unique_id=1145074505 instance=ExtResource("5_6q06x")]
+transform = Transform3D(1, 0, 0, 0, 0.20282137, -0.9792158, 0, 0.9792158, 0.20282137, 5.751723, 4.355509, 6.281372)

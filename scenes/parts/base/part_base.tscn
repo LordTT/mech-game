@@ -5,8 +5,12 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_x1re2"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_fr6c0"]
+friction = 1.8
+rough = true
+absorbent = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5n6tx"]
+size = Vector3(1, 2.2495117, 1)
 
 [node name="PartBase" type="Node3D" unique_id=685279653]
 script = ExtResource("1_fr6c0")
@@ -19,9 +23,10 @@ script = ExtResource("1_fr6c0")
 shape = SubResource("BoxShape3D_x1re2")
 
 [node name="LooseBody" type="RigidBody3D" parent="." unique_id=1687196333]
+mass = 35.0
 physics_material_override = SubResource("PhysicsMaterial_fr6c0")
-linear_damp = 2.0
-angular_damp = 2.0
+linear_damp = 8.0
+angular_damp = 10.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="LooseBody" unique_id=741347958]
 shape = SubResource("BoxShape3D_5n6tx")
