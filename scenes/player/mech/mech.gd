@@ -46,6 +46,7 @@ func _physics_process(delta: float) -> void:
 
 	if _should_brace_without_legs():
 		_apply_no_legs_brace()
+		_update_attached_leg_animation(delta, Vector3.ZERO, 0.0)
 		return
 
 	if not is_player_controlled:
@@ -57,11 +58,12 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity.y = 0.0
 
+		_update_attached_leg_animation(delta, Vector3.ZERO, 0.0)
 		move_and_slide()
 		return
 
-	var speed_mult := get_legs_move_speed_multiplier()
-	var turn_mult := get_legs_turn_speed_multiplier()
+	var speed_mult: float = get_legs_move_speed_multiplier()
+	var turn_mult: float = get_legs_turn_speed_multiplier()
 
 	var input_dir: Vector2 = Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
@@ -92,6 +94,11 @@ func _physics_process(delta: float) -> void:
 	if move_vector.length() > 0.01:
 		var target_yaw: float = atan2(move_vector.x, move_vector.z)
 		rotation.y = lerp_angle(rotation.y, target_yaw, turn_speed * turn_mult * delta)
+
+	var horizontal_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
+	var local_horizontal_velocity: Vector3 = global_transform.basis.inverse() * horizontal_velocity
+	var move_amount: float = clampf(horizontal_velocity.length() / maxf(move_speed, 0.001), 0.0, 1.0)
+	_update_attached_leg_animation(delta, local_horizontal_velocity, move_amount)
 
 	move_and_slide()
 
@@ -129,15 +136,26 @@ func get_legs_turn_speed_multiplier() -> float:
 
 	return 1.0
 
+func _update_attached_leg_animation(delta: float, local_move_velocity: Vector3, move_amount: float) -> void:
+	var part = legs_slot.current_part
+	if part == null:
+		return
+
+	if part.has_method("update_leg_animation"):
+		part.update_leg_animation(delta, local_move_velocity, move_amount)
+
 func _rebuild_attached_collision_proxies() -> void:
 	_clear_attached_collision_proxies()
 
 	for slot_node in slots_root.get_children():
-		var slot := slot_node as Node3D
+		var slot: Node3D = slot_node as Node3D
 		if slot == null:
 			continue
 
-		var part := slot.get("current_part") as Node3D
+		if not slot.has_method("get_current_part"):
+			continue
+
+		var part: Node3D = slot.get_current_part()
 		if part == null:
 			continue
 
@@ -154,7 +172,7 @@ func _add_attached_collision_proxy(slot: Node3D, part: Node3D) -> void:
 	if source_shape == null:
 		return
 
-	var proxy := CollisionShape3D.new()
+	var proxy: CollisionShape3D = CollisionShape3D.new()
 	proxy.name = "AttachedCollision_%s" % slot.name
 	proxy.shape = source_shape.duplicate()
 	add_child(proxy)

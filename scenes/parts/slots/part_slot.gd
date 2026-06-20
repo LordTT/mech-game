@@ -10,6 +10,9 @@ var highlight_material: StandardMaterial3D = null
 func _ready() -> void:
 	_ensure_debug_mesh()
 
+func get_current_part() -> Node3D:
+	return current_part
+
 func can_attach(part: Node) -> bool:
 	if current_part != null:
 		return false
@@ -22,7 +25,7 @@ func can_attach(part: Node) -> bool:
 func attach_part(part: Node3D) -> void:
 	current_part = part
 
-	var saved_transform := global_transform
+	var saved_transform: Transform3D = global_transform
 	part.reparent(self)
 	part.global_transform = saved_transform
 
@@ -39,7 +42,7 @@ func detach_part() -> Node3D:
 	return part
 
 func notify_part_changed() -> void:
-	var node := get_parent()
+	var node: Node = get_parent()
 	while node != null:
 		if node.has_method("on_slot_part_changed"):
 			node.on_slot_part_changed(self)
@@ -70,7 +73,7 @@ func _ensure_debug_mesh() -> void:
 	debug_mesh = MeshInstance3D.new()
 	debug_mesh.name = "DebugMesh"
 
-	var sphere := SphereMesh.new()
+	var sphere: SphereMesh = SphereMesh.new()
 	sphere.radius = 0.18
 	sphere.height = 0.36
 	debug_mesh.mesh = sphere
