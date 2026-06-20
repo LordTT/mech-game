@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://d2bjnji2genxu" path="res://scenes/parts/base/part_base.tscn" id="1_i6174"]
 [ext_resource type="Script" uid="uid://h6cpd6pcsm03" path="res://scenes/parts/legs/legs_base.gd" id="2_u0ds3"]
+[ext_resource type="PackedScene" uid="uid://cb2o0m8tctfgp" path="res://art/exports/walker_basic.glb" id="3_vh0mx"]
 
 [node name="PartBase" unique_id=685279653 instance=ExtResource("1_i6174")]
 script = ExtResource("2_u0ds3")
@@ -10,3 +11,5 @@ turn_speed_multiplier = 0.7
 part_type = "legs"
 display_name = "Heavy Legs"
 detach_resistance = 1.8
+
+[node name="walker_basic2" parent="VisualRoot" parent_id_path=PackedInt32Array(1590296688) index="0" unique_id=1400508088 instance=ExtResource("3_vh0mx")]

@@ -6,18 +6,27 @@ extends Node3D
 @export var detach_resistance: float = 1.0
 
 @onready var visual_root: Node3D = $VisualRoot
-@onready var mesh: MeshInstance3D = $VisualRoot/MeshInstance3D
 @onready var interact_area: Area3D = $InteractArea
 @onready var interact_collision: CollisionShape3D = $InteractArea/CollisionShape3D
 @onready var loose_body: RigidBody3D = $LooseBody
 @onready var loose_collision: CollisionShape3D = $LooseBody/CollisionShape3D
 
-var original_material: Material = null
+var meshes: Array[MeshInstance3D] = []
+var original_materials: Dictionary = {}
+
 var is_held: bool = false
 var attached_slot: Node3D = null
 
 func _ready() -> void:
-	original_material = mesh.get_active_material(0)
+	meshes.clear()
+	_find_meshes(visual_root)
+
+	if meshes.is_empty():
+		push_error("PartBase: No MeshInstance3D found under VisualRoot in " + name)
+		return
+
+	for mesh in meshes:
+		original_materials[mesh] = mesh.get_active_material(0)
 
 	interact_area.set_meta("part_root", self)
 	loose_body.set_meta("part_root", self)
@@ -42,18 +51,23 @@ func get_detach_resistance() -> float:
 func highlight() -> void:
 	if is_held:
 		return
-	if original_material == null:
-		return
 
-	var mat := original_material.duplicate() as StandardMaterial3D
-	mat.albedo_color = Color(1, 1, 0)
-	mesh.set_surface_override_material(0, mat)
+	for mesh in meshes:
+		var original_material: Material = original_materials.get(mesh)
+		if original_material == null:
+			continue
+
+		var mat := original_material.duplicate() as StandardMaterial3D
+		mat.albedo_color = Color(1, 1, 0)
+		mesh.set_surface_override_material(0, mat)
 
 func unhighlight() -> void:
-	if original_material == null:
-		return
-
-	mesh.set_surface_override_material(0, original_material)
+	for mesh in meshes:
+		var original_material: Material = original_materials.get(mesh)
+		if original_material == null:
+			mesh.set_surface_override_material(0, null)
+		else:
+			mesh.set_surface_override_material(0, original_material)
 
 func pick_up() -> void:
 	is_held = true
@@ -105,3 +119,10 @@ func _set_loose_state(enabled: bool) -> void:
 
 func _sync_loose_body_to_root() -> void:
 	loose_body.global_transform = global_transform
+
+func _find_meshes(node: Node) -> void:
+	if node is MeshInstance3D:
+		meshes.append(node)
+
+	for child in node.get_children():
+		_find_meshes(child)

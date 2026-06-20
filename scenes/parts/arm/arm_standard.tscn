@@ -3,9 +3,14 @@
 [ext_resource type="PackedScene" uid="uid://d2bjnji2genxu" path="res://scenes/parts/base/part_base.tscn" id="1_c0ko2"]
 [ext_resource type="Script" uid="uid://c6fn4bfnrmep6" path="res://scenes/parts/arm/arm_base.gd" id="2_2jiol"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_2jiol"]
+
 [node name="PartBase" unique_id=685279653 instance=ExtResource("1_c0ko2")]
 script = ExtResource("2_2jiol")
 damage = 10.0
 fire_rate = 1.0
 part_type = "arm"
 display_name = "Scrap Arm"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualRoot" parent_id_path=PackedInt32Array(1590296688) index="0" unique_id=419262884]
+mesh = SubResource("BoxMesh_2jiol")
