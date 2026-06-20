@@ -16,6 +16,7 @@ display_name = "Standard Legs"
 detach_resistance = 1.4
 
 [node name="walker_basic2" parent="VisualRoot" parent_id_path=PackedInt32Array(1590296688) index="0" unique_id=1400508088 instance=ExtResource("3_xuhar")]
+transform = Transform3D(-0.024432179, 0, -0.9997015, 0, 1, 0, 0.9997015, 0, -0.024432179, 0, 0, 0)
 
 [node name="LooseBody" parent="." index="2" unique_id=1687196333]
 mass = 1.0
@@ -23,5 +24,5 @@ linear_damp = 2.0
 angular_damp = 2.0
 
 [node name="CollisionShape3D" parent="LooseBody" index="0" unique_id=741347958]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+transform = Transform3D(-0.024432179, 0, -0.9997015, 0, 1, 0, 0.9997015, 0, -0.024432179, 0, -0.6, 0)
 shape = SubResource("BoxShape3D_xuhar")

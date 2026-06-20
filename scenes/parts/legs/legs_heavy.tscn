@@ -4,6 +4,9 @@
 [ext_resource type="Script" uid="uid://h6cpd6pcsm03" path="res://scenes/parts/legs/legs_base.gd" id="2_u0ds3"]
 [ext_resource type="PackedScene" uid="uid://cb2o0m8tctfgp" path="res://art/exports/walker_basic.glb" id="3_vh0mx"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_vh0mx"]
+size = Vector3(1.7, 3, 2)
+
 [node name="PartBase" unique_id=685279653 instance=ExtResource("1_i6174")]
 script = ExtResource("2_u0ds3")
 move_speed_multiplier = 0.75
@@ -13,3 +16,8 @@ display_name = "Heavy Legs"
 detach_resistance = 1.8
 
 [node name="walker_basic2" parent="VisualRoot" parent_id_path=PackedInt32Array(1590296688) index="0" unique_id=1400508088 instance=ExtResource("3_vh0mx")]
+transform = Transform3D(-0.024432179, 0, -0.9997015, 0, 1, 0, 0.9997015, 0, -0.024432179, 0, 0, 0)
+
+[node name="CollisionShape3D" parent="LooseBody" parent_id_path=PackedInt32Array(1687196333) index="0" unique_id=741347958]
+transform = Transform3D(-0.024432179, 0, -0.9997015, 0, 1, 0, 0.9997015, 0, -0.024432179, 0, -0.6, 0)
+shape = SubResource("BoxShape3D_vh0mx")
